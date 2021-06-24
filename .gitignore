@@ -1,3 +1,20 @@
+# output dir
+output/
+wandb/
+
+# cluster hostfiles
+hostfiles/
+
+# Data files
+*.jpg
+*.png
+*.txt
+*.avi
+*.mp4
+*.bin
+*.pth
+*.pkl
+
 # compilation and distribution
 __pycache__
 _ext
@@ -7,9 +24,11 @@ build/
 dist/
 *.egg-info/
 
-# pytorch/python formats
+# pytorch/python/numpy formats
 *.pth
 *.pkl
+*.npy
+*.npz
 
 # ipython/jupyter notebooks
 *.ipynb
@@ -24,11 +43,12 @@ dist/
 # Pycharm editor settings
 .idea
 
-# VS code 
+# VS code
 .vscode
 
 # MacOS
 .DS_Store
+
 
 # project dirs
 /data
