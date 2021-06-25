@@ -636,11 +636,12 @@ def main(args):
     args.distributed = args.num_gpus > 1
     args.device = torch.device(args.device)
     if args.distributed:
-        print(
-            "Init distributed training on local rank {} ({}), rank {}, world size {}".format(
-                args.local_rank, int(os.environ["LOCAL_RANK"]), int(os.environ["NODE_RANK"]), args.num_gpus
-            )
-        )
+        # # (dennis.park) commenting out. `LOCAL_RANK` is undefined.
+        # print(
+        #     "Init distributed training on local rank {} ({}), rank {}, world size {}".format(
+        #         args.local_rank, int(os.environ["LOCAL_RANK"]), int(os.environ["NODE_RANK"]), args.num_gpus
+        #     )
+        # )
         torch.cuda.set_device(args.local_rank)
         torch.distributed.init_process_group(backend='nccl', init_method='env://')
         local_rank = int(os.environ["LOCAL_RANK"])
