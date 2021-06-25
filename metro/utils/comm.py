@@ -76,14 +76,14 @@ def gather_on_master(data):
     max_size = max(size_list)
 
     if local_size != max_size:
-        padding = torch.ByteTensor(size=(max_size - local_size,))
+        padding = torch.ByteTensor(size=(max_size - local_size, ))
         tensor = torch.cat((tensor, padding), dim=0)
         del padding
 
     if is_main_process():
         tensor_list = []
         for _ in size_list:
-            tensor_list.append(torch.ByteTensor(size=(max_size,)))
+            tensor_list.append(torch.ByteTensor(size=(max_size, )))
         dist.gather(tensor, gather_list=tensor_list, dst=0)
         del tensor
     else:
@@ -130,9 +130,9 @@ def all_gather(data):
     # gathering tensors of different shapes
     tensor_list = []
     for _ in size_list:
-        tensor_list.append(torch.ByteTensor(size=(max_size,)).to("cuda"))
+        tensor_list.append(torch.ByteTensor(size=(max_size, )).to("cuda"))
     if local_size != max_size:
-        padding = torch.ByteTensor(size=(max_size - local_size,)).to("cuda")
+        padding = torch.ByteTensor(size=(max_size - local_size, )).to("cuda")
         tensor = torch.cat((tensor, padding), dim=0)
     dist.all_gather(tensor_list, tensor)
 

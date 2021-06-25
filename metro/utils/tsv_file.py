@@ -5,7 +5,6 @@ Licensed under the MIT license.
 Definition of TSV class
 """
 
-
 import logging
 import os
 import os.path as op
@@ -13,11 +12,11 @@ import os.path as op
 
 def generate_lineidx(filein, idxout):
     idxout_tmp = idxout + '.tmp'
-    with open(filein, 'r') as tsvin, open(idxout_tmp,'w') as tsvout:
+    with open(filein, 'r') as tsvin, open(idxout_tmp, 'w') as tsvout:
         fsize = os.fstat(tsvin.fileno()).st_size
         fpos = 0
-        while fpos!=fsize:
-            tsvout.write(str(fpos)+"\n")
+        while fpos != fsize:
+            tsvout.write(str(fpos) + "\n")
             tsvin.readline()
             fpos = tsvin.tell()
     os.rename(idxout_tmp, idxout)
@@ -29,7 +28,7 @@ def read_to_character(fp, c):
         s = fp.read(32)
         assert s != ''
         if c in s:
-            result.append(s[: s.index(c)])
+            result.append(s[:s.index(c)])
             break
         else:
             result.append(s)
@@ -42,7 +41,7 @@ class TSVFile(object):
         self.lineidx = op.splitext(tsv_file)[0] + '.lineidx'
         self._fp = None
         self._lineidx = None
-        # the process always keeps the process which opens the file. 
+        # the process always keeps the process which opens the file.
         # If the pid is not equal to the currrent pid, we will re-open the file.
         self.pid = None
         # generate lineidx if not exist
@@ -158,5 +157,3 @@ def load_list_file(fname):
     if len(result) > 0 and result[-1] == '':
         result = result[:-1]
     return result
-
-

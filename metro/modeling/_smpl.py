@@ -17,19 +17,19 @@ except ImportError:
 from metro.utils.geometric_layers import rodrigues
 import metro.modeling.data.config as cfg
 
-class SMPL(nn.Module):
 
+class SMPL(nn.Module):
     def __init__(self, gender='neutral'):
         super(SMPL, self).__init__()
 
-        if gender=='m':
-            model_file=cfg.SMPL_Male
-        elif gender=='f':
-            model_file=cfg.SMPL_Female
+        if gender == 'm':
+            model_file = cfg.SMPL_Male
+        elif gender == 'f':
+            model_file = cfg.SMPL_Female
         else:
-            model_file=cfg.SMPL_FILE
+            model_file = cfg.SMPL_FILE
 
-        smpl_model = pickle.load(open(model_file, 'rb'), encoding='latin1') 
+        smpl_model = pickle.load(open(model_file, 'rb'), encoding='latin1')
         J_regressor = smpl_model['J_regressor'].tocoo()
         row = J_regressor.row
         col = J_regressor.col
@@ -45,7 +45,12 @@ class SMPL(nn.Module):
         self.register_buffer('faces', torch.from_numpy(smpl_model['f'].astype(np.int64)))
         self.register_buffer('kintree_table', torch.from_numpy(smpl_model['kintree_table'].astype(np.int64)))
         id_to_col = {self.kintree_table[1, i].item(): i for i in range(self.kintree_table.shape[1])}
-        self.register_buffer('parent', torch.LongTensor([id_to_col[self.kintree_table[0, it].item()] for it in range(1, self.kintree_table.shape[1])]))
+        self.register_buffer(
+            'parent',
+            torch.LongTensor([
+                id_to_col[self.kintree_table[0, it].item()] for it in range(1, self.kintree_table.shape[1])
+            ])
+        )
 
         self.pose_shape = [24, 3]
         self.beta_shape = [10]
@@ -58,7 +63,7 @@ class SMPL(nn.Module):
         self.verts = None
         self.J = None
         self.R = None
-        
+
         J_regressor_extra = torch.from_numpy(np.load(cfg.JOINT_REGRESSOR_TRAIN_EXTRA)).float()
         self.register_buffer('J_regressor_extra', J_regressor_extra)
         self.joints_idx = cfg.JOINTS_IDX
@@ -66,12 +71,11 @@ class SMPL(nn.Module):
         J_regressor_h36m_correct = torch.from_numpy(np.load(cfg.JOINT_REGRESSOR_H36M_correct)).float()
         self.register_buffer('J_regressor_h36m_correct', J_regressor_h36m_correct)
 
-
     def forward(self, pose, beta):
         device = pose.device
         batch_size = pose.shape[0]
         v_template = self.v_template[None, :]
-        shapedirs = self.shapedirs.view(-1,10)[None, :].expand(batch_size, -1, -1)
+        shapedirs = self.shapedirs.view(-1, 10)[None, :].expand(batch_size, -1, -1)
         beta = beta[:, :, None]
         v_shaped = torch.matmul(shapedirs, beta).view(-1, 6890, 3) + v_template
         # batched sparse matmul not supported in pytorch
@@ -84,22 +88,22 @@ class SMPL(nn.Module):
             R = pose
         # input it rotmat: (bs,72)
         elif pose.ndimension() == 2:
-            pose_cube = pose.view(-1, 3) # (batch_size * 24, 1, 3)
+            pose_cube = pose.view(-1, 3)  # (batch_size * 24, 1, 3)
             R = rodrigues(pose_cube).view(batch_size, 24, 3, 3)
             R = R.view(batch_size, 24, 3, 3)
         I_cube = torch.eye(3)[None, None, :].to(device)
         # I_cube = torch.eye(3)[None, None, :].expand(theta.shape[0], R.shape[1]-1, -1, -1)
-        lrotmin = (R[:,1:,:] - I_cube).view(batch_size, -1)
-        posedirs = self.posedirs.view(-1,207)[None, :].expand(batch_size, -1, -1)
+        lrotmin = (R[:, 1:, :] - I_cube).view(batch_size, -1)
+        posedirs = self.posedirs.view(-1, 207)[None, :].expand(batch_size, -1, -1)
         v_posed = v_shaped + torch.matmul(posedirs, lrotmin[:, :, None]).view(-1, 6890, 3)
         J_ = J.clone()
         J_[:, 1:, :] = J[:, 1:, :] - J[:, self.parent, :]
         G_ = torch.cat([R, J_[:, :, :, None]], dim=-1)
-        pad_row = torch.FloatTensor([0,0,0,1]).to(device).view(1,1,1,4).expand(batch_size, 24, -1, -1)
+        pad_row = torch.FloatTensor([0, 0, 0, 1]).to(device).view(1, 1, 1, 4).expand(batch_size, 24, -1, -1)
         G_ = torch.cat([G_, pad_row], dim=2)
         G = [G_[:, 0].clone()]
         for i in range(1, 24):
-            G.append(torch.matmul(G[self.parent[i-1]], G_[:, i, :, :]))
+            G.append(torch.matmul(G[self.parent[i - 1]], G_[:, i, :, :]))
         G = torch.stack(G, dim=1)
 
         rest = torch.cat([J, torch.zeros(batch_size, 24, 1).to(device)], dim=2).view(batch_size, 24, 4, 1)
@@ -107,7 +111,8 @@ class SMPL(nn.Module):
         rest = torch.cat([zeros, rest], dim=-1)
         rest = torch.matmul(G, rest)
         G = G - rest
-        T = torch.matmul(self.weights, G.permute(1,0,2,3).contiguous().view(24,-1)).view(6890, batch_size, 4, 4).transpose(0,1)
+        T = torch.matmul(self.weights,
+                         G.permute(1, 0, 2, 3).contiguous().view(24, -1)).view(6890, batch_size, 4, 4).transpose(0, 1)
         rest_shape_h = torch.cat([v_posed, torch.ones_like(v_posed)[:, :, [0]]], dim=-1)
         v = torch.matmul(T, rest_shape_h[:, :, :, None])[:, :, :3, 0]
         return v
@@ -137,6 +142,7 @@ class SMPL(nn.Module):
         joints = torch.einsum('bik,ji->bjk', [vertices, self.J_regressor_h36m_correct])
         return joints
 
+
 class SparseMM(torch.autograd.Function):
     """Redefine sparse @ dense matrix multiplication to enable backpropagation.
     The builtin matrix multiplication operation does not support backpropagation in some cases.
@@ -155,6 +161,7 @@ class SparseMM(torch.autograd.Function):
             grad_input = torch.matmul(sparse.t(), grad_output)
         return None, grad_input
 
+
 def spmm(sparse, dense):
     return SparseMM.apply(sparse, dense)
 
@@ -163,18 +170,18 @@ def scipy_to_pytorch(A, U, D):
     """Convert scipy sparse matrices to pytorch sparse matrix."""
     ptU = []
     ptD = []
-    
+
     for i in range(len(U)):
         u = scipy.sparse.coo_matrix(U[i])
         i = torch.LongTensor(np.array([u.row, u.col]))
         v = torch.FloatTensor(u.data)
         ptU.append(torch.sparse.FloatTensor(i, v, u.shape))
-    
+
     for i in range(len(D)):
         d = scipy.sparse.coo_matrix(D[i])
         i = torch.LongTensor(np.array([d.row, d.col]))
         v = torch.FloatTensor(d.data)
-        ptD.append(torch.sparse.FloatTensor(i, v, d.shape)) 
+        ptD.append(torch.sparse.FloatTensor(i, v, d.shape))
 
     return ptU, ptD
 
@@ -188,7 +195,7 @@ def adjmat_sparse(adjmat, nsize=1):
             adjmat = adjmat * orig_adjmat
     adjmat.data = np.ones_like(adjmat.data)
     for i in range(adjmat.shape[0]):
-        adjmat[i,i] = 1
+        adjmat[i, i] = 1
     num_neighbors = np.array(1 / adjmat.sum(axis=-1))
     adjmat = adjmat.multiply(num_neighbors)
     adjmat = scipy.sparse.coo_matrix(adjmat)
@@ -199,6 +206,7 @@ def adjmat_sparse(adjmat, nsize=1):
     v = torch.from_numpy(data).float()
     adjmat = torch.sparse.FloatTensor(i, v, adjmat.shape)
     return adjmat
+
 
 def get_graph_params(filename, nsize=1):
     """Load and process graph adjacency matrix and upsampling/downsampling matrices."""
@@ -213,8 +221,7 @@ def get_graph_params(filename, nsize=1):
 
 class Mesh(object):
     """Mesh object that is used for handling certain graph operations."""
-    def __init__(self, filename=cfg.SMPL_sampling_matrix,
-                 num_downsampling=1, nsize=1, device=torch.device('cuda')):
+    def __init__(self, filename=cfg.SMPL_sampling_matrix, num_downsampling=1, nsize=1, device=torch.device('cuda')):
         self._A, self._U, self._D = get_graph_params(filename=filename, nsize=nsize)
         # self._A = [a.to(device) for a in self._A]
         self._U = [u.to(device) for u in self._U]
@@ -224,7 +231,7 @@ class Mesh(object):
         # load template vertices from SMPL and normalize them
         smpl = SMPL()
         ref_vertices = smpl.v_template
-        center = 0.5*(ref_vertices.max(dim=0)[0] + ref_vertices.min(dim=0)[0])[None]
+        center = 0.5 * (ref_vertices.max(dim=0)[0] + ref_vertices.min(dim=0)[0])[None]
         ref_vertices -= center
         ref_vertices /= ref_vertices.abs().max().item()
 
