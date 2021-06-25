@@ -1,4 +1,3 @@
-
 # ------------------------------------------------------------------------------
 # Copyright (c) Microsoft
 # Licensed under the MIT License.
@@ -14,13 +13,12 @@ import os
 
 from yacs.config import CfgNode as CN
 
-
 _C = CN()
 
 _C.OUTPUT_DIR = ''
 _C.LOG_DIR = ''
 _C.DATA_DIR = ''
-_C.GPUS = (0,)
+_C.GPUS = (0, )
 _C.WORKERS = 4
 _C.PRINT_FREQ = 20
 _C.AUTO_RESUME = False
@@ -135,4 +133,3 @@ if __name__ == '__main__':
     import sys
     with open(sys.argv[1], 'w') as f:
         print(_C, file=f)
-

@@ -5,7 +5,6 @@ Licensed under the MIT license.
 Basic operations for TSV files
 """
 
-
 import os
 import os.path as op
 import json
@@ -27,6 +26,7 @@ def img_from_base64(imagestring):
     except ValueError:
         return None
 
+
 def load_linelist_file(linelist_file):
     if linelist_file is not None:
         line_list = []
@@ -34,6 +34,7 @@ def load_linelist_file(linelist_file):
             for i in fp:
                 line_list.append(int(i.strip()))
         return line_list
+
 
 def tsv_writer(values, tsv_file, sep='\t'):
     mkdir(op.dirname(tsv_file))
@@ -45,7 +46,7 @@ def tsv_writer(values, tsv_file, sep='\t'):
         assert values is not None
         for value in values:
             assert value is not None
-            value = [v if type(v)!=bytes else v.decode('utf-8') for v in value]
+            value = [v if type(v) != bytes else v.decode('utf-8') for v in value]
             v = '{0}\n'.format(sep.join(map(str, value)))
             fp.write(v)
             fpidx.write(str(idx) + '\n')
@@ -53,15 +54,18 @@ def tsv_writer(values, tsv_file, sep='\t'):
     os.rename(tsv_file_tmp, tsv_file)
     os.rename(lineidx_file_tmp, lineidx_file)
 
+
 def tsv_reader(tsv_file, sep='\t'):
     with open(tsv_file, 'r') as fp:
         for i, line in enumerate(fp):
             yield [x.strip() for x in line.split(sep)]
 
+
 def config_save_file(tsv_file, save_file=None, append_str='.new.tsv'):
     if save_file is not None:
         return save_file
     return op.splitext(tsv_file)[0] + append_str
+
 
 def get_line_list(linelist_file=None, num_rows=None):
     if linelist_file is not None:
@@ -70,23 +74,26 @@ def get_line_list(linelist_file=None, num_rows=None):
     if num_rows is not None:
         return [i for i in range(num_rows)]
 
+
 def generate_hw_file(img_file, save_file=None):
     rows = tsv_reader(img_file)
+
     def gen_rows():
         for i, row in tqdm(enumerate(rows)):
             row1 = [row[0]]
             img = img_from_base64(row[-1])
             height = img.shape[0]
             width = img.shape[1]
-            row1.append(json.dumps([{"height":height, "width": width}]))
+            row1.append(json.dumps([{"height": height, "width": width}]))
             yield row1
 
     save_file = config_save_file(img_file, save_file, '.hw.tsv')
     tsv_writer(gen_rows(), save_file)
 
+
 def generate_linelist_file(label_file, save_file=None, ignore_attrs=()):
     # generate a list of image that has labels
-    # images with only ignore labels are not selected. 
+    # images with only ignore labels are not selected.
     line_list = []
     rows = tsv_reader(label_file)
     for i, row in tqdm(enumerate(rows)):
@@ -100,9 +107,11 @@ def generate_linelist_file(label_file, save_file=None, ignore_attrs=()):
     save_file = config_save_file(label_file, save_file, '.linelist.tsv')
     tsv_writer(line_list, save_file)
 
+
 def load_from_yaml_file(yaml_file):
     with open(yaml_file, 'r') as fp:
         return yaml.load(fp, Loader=yaml.CLoader)
+
 
 def find_file_path_in_yaml(fname, root):
     if fname is not None:
@@ -111,6 +120,4 @@ def find_file_path_in_yaml(fname, root):
         elif op.isfile(op.join(root, fname)):
             return op.join(root, fname)
         else:
-            raise FileNotFoundError(
-                errno.ENOENT, os.strerror(errno.ENOENT), op.join(root, fname)
-            )
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), op.join(root, fname))

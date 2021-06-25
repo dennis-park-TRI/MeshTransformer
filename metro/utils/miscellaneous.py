@@ -70,8 +70,7 @@ def freeze_weights(model, regexp):
         logger.info("Disabled training of {}".format(weight_name))
 
 
-def unfreeze_weights(model, regexp, backbone_freeze_at=-1,
-        is_distributed=False):
+def unfreeze_weights(model, regexp, backbone_freeze_at=-1, is_distributed=False):
     """Unfreeze weights based on regular expression.
     This is helpful during training to unfreeze freezed weights after
     other unfreezed weights have been trained for some iterations.
@@ -104,7 +103,7 @@ def concat_files(ins, out):
         for i, f in enumerate(ins):
             logging.info('concating {}/{} - {}'.format(i, len(ins), f))
             with open(f, 'rb') as fp_in:
-                shutil.copyfileobj(fp_in, fp_out, 1024*1024*10)
+                shutil.copyfileobj(fp_in, fp_out, 1024 * 1024 * 10)
     os.rename(out_tmp, out)
 
 
@@ -138,6 +137,7 @@ def try_once(func):
             return func(*args, **kwargs)
         except Exception as e:
             logging.info('ignore error \n{}'.format(str(e)))
+
     return func_wrapper
 
 
@@ -167,5 +167,3 @@ def write_to_yaml_file(context, file_name):
 def load_from_yaml_file(yaml_file):
     with open(yaml_file, 'r') as fp:
         return yaml.load(fp, Loader=yaml.CLoader)
-
-

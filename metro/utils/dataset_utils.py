@@ -4,7 +4,6 @@ Licensed under the MIT license.
 
 """
 
-
 import os
 import os.path as op
 import numpy as np
