@@ -109,6 +109,8 @@ WORKDIR ${WORKSPACE}
 # # (Optional)
 # RUN python setup.py build develop
 
+ENV PYTHONPATH "${PYTHONPATH}:${WORKSPACE}/metro/"
+
 # -------------------------------------
 # Install project-specific PIP packages.
 # -------------------------------------
