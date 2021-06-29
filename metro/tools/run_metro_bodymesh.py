@@ -676,7 +676,6 @@ def main(args):
         # init three transformer-encoder blocks in a loop
         for i in range(len(output_feat_dim)):
             config_class, model_class = BertConfig, METRO
-            import pdb; pdb.set_trace()
             config = config_class.from_pretrained(args.config_name if args.config_name \
                     else args.model_name_or_path)
 
