@@ -109,7 +109,7 @@ WORKDIR ${WORKSPACE}
 # # (Optional)
 # RUN python setup.py build develop
 
-ENV PYTHONPATH "${PYTHONPATH}:${WORKSPACE}/metro/"
+ENV PYTHONPATH "${PYTHONPATH}:${WORKSPACE}/metro/:${WORKSPACE}/manopth/"
 
 # -------------------------------------
 # Install project-specific PIP packages.
@@ -122,7 +122,7 @@ RUN apt-get update && apt-get install -y \
         libglu1-mesa-dev \
         freeglut3-dev
 
-RUN pip install cython opencv-python opendr
+RUN pip install cython opencv-python opendr hydra-core
 
 # For panoptic segmentation experiments (and for preparing panoptic dataset)
 # RUN pip install git+https://github.com/cocodataset/panopticapi.git

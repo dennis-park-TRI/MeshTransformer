@@ -1,0 +1,10 @@
+# NOTE: This config is incomplete.
+CHECKPOINT: ""
+
+BODY_MODEL: SMPL
+
+INPUT_FEAT_DIM: [2051, 512, 128]
+HIDDEN_FEAT_DIM: [1024, 256, 128]
+
+TRANSFORMER_CONFIG_FILE: metro/modeling/bert/bert-base-uncased/config.json
+DROPOUT_RATIO_IN_BERT: 0.1

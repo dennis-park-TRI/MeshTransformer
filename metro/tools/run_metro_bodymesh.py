@@ -20,8 +20,11 @@ import cv2
 import numpy as np
 import torch
 
-import metro.modeling.data.config as cfg
 import torchvision.models as models
+from detectron2.utils.comm import all_gather, get_rank, get_world_size, is_main_process, synchronize
+from torchvision.utils import make_grid
+
+import metro.modeling.data.config as cfg
 from metro.datasets.build import make_data_loader
 from metro.modeling._smpl import SMPL, Mesh
 from metro.modeling.bert import METRO, BertConfig
@@ -29,14 +32,12 @@ from metro.modeling.bert import METRO_Body_Network as METRO_Network
 from metro.modeling.hrnet.config import config as hrnet_config
 from metro.modeling.hrnet.config import update_config as hrnet_update_config
 from metro.modeling.hrnet.hrnet_cls_net_featmaps import get_cls_net
-from metro.utils.comm import all_gather, get_rank, get_world_size, is_main_process, synchronize
 from metro.utils.geometric_layers import orthographic_projection
 from metro.utils.logger import setup_logger
 from metro.utils.metric_logger import AverageMeter, EvalMetricsLogger
 from metro.utils.metric_pampjpe import reconstruction_error
 from metro.utils.miscellaneous import mkdir, set_seed
 from metro.utils.renderer import Renderer, visualize_reconstruction, visualize_reconstruction_test
-from torchvision.utils import make_grid
 
 
 def save_checkpoint(model, args, epoch, iteration, num_trial=10):
