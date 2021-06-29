@@ -1,15 +1,17 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import errno
+import logging
 import os
 import os.path as op
+import random
 import re
-import logging
+import shutil
+
 import numpy as np
 import torch
-import random
-import shutil
-from .comm import is_main_process
 import yaml
+
+from detectron2.utils.comm import is_main_process
 
 
 def mkdir(path):

@@ -55,6 +55,7 @@ dist/
 /datasets
 models
 output
+outputs
 exps
 predictions
 

@@ -1,0 +1,18 @@
+defaults:
+  - model/metro_smpl
+
+WANDB:
+  ENABLED: True
+  DRYRUN: False
+  PROJECT: metro
+  TAGS: []
+
+hydra:
+  callbacks:
+    wandb_callback:
+      _target_: metro.utils.hydra.callbacks.WandbOutputDirCallback
+    d2_logger_callback:
+      _target_: metro.utils.hydra.callbacks.D2LoggerCallback
+    download_ckpt_callback:
+      _target_: metro.utils.hydra.callbacks.DownloadCkptCallback
+  verbose: True

@@ -8,7 +8,7 @@ import os.path as op
 import torch
 import logging
 import code
-from metro.utils.comm import get_world_size
+from detectron2.utils.comm import get_world_size
 from metro.datasets.human_mesh_tsv import (MeshTSVDataset, MeshTSVYamlDataset)
 from metro.datasets.hand_mesh_tsv import (HandMeshTSVDataset, HandMeshTSVYamlDataset)
 
