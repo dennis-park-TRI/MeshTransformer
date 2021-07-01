@@ -1,0 +1,39 @@
+MAX_ITER: 40000
+BASE_LR: 0.001
+
+# Number of images per batch across all machines.
+# If we have 16 GPUs and IMS_PER_BATCH: 32,
+# each GPU will see 2 images per batch.
+# May be adjusted automatically if REFERENCE_WORLD_SIZE is set.
+IMS_PER_BATCH: 16
+
+MOMENTUM: 0.9
+NESTEROV: False
+WEIGHT_DECAY: 0.0001
+# The weight decay that's applied to parameters of normalization layers
+# (typically the affine transformation)
+WEIGHT_DECAY_NORM: 0.0
+
+# Save a checkpoint after every this number of iterations
+CHECKPOINT_PERIOD: 5000
+
+# (dennis.park) Adaptive Gradient Clipping
+# https://github.com/vballoli/nfnets-pytorch/blob/main/nfnets/agc.py
+AGC:
+  ENABLED: False
+  CLIP_VALUE: 100.0
+  EPS: 0.001
+
+
+# LR scheduler
+LR_SCHEDULER_NAME: WarmupMultiStepLR
+
+GAMMA: 0.1
+# The iteration number to decrease learning rate by GAMMA.
+STEPS: [30000]
+
+WARMUP_FACTOR: 0.0001
+WARMUP_ITERS: 1000
+WARMUP_METHOD: "linear"
+
+USE_MIXED_PRECISION: True

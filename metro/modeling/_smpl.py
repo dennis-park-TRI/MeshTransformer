@@ -5,6 +5,7 @@ It is adapted from opensource project GraphCMR (https://github.com/nkolot/GraphC
 """
 from __future__ import division
 
+import os
 import torch
 import torch.nn as nn
 import numpy as np
@@ -17,6 +18,7 @@ except ImportError:
 from metro.utils.geometric_layers import rodrigues
 import metro.modeling.data.config as cfg
 
+from hydra.utils import get_original_cwd
 
 class SMPL(nn.Module):
     def __init__(self, gender='neutral'):
@@ -28,6 +30,11 @@ class SMPL(nn.Module):
             model_file = cfg.SMPL_Female
         else:
             model_file = cfg.SMPL_FILE
+
+        # (dennis.park) This is ugly, but need to be here for backwrard compatibility.
+        from hydra.core.hydra_config import HydraConfig
+        if HydraConfig.initialized():
+            model_file = os.path.join(get_original_cwd(), model_file)
 
         smpl_model = pickle.load(open(model_file, 'rb'), encoding='latin1')
         J_regressor = smpl_model['J_regressor'].tocoo()
@@ -64,11 +71,21 @@ class SMPL(nn.Module):
         self.J = None
         self.R = None
 
-        J_regressor_extra = torch.from_numpy(np.load(cfg.JOINT_REGRESSOR_TRAIN_EXTRA)).float()
+        # (dennis.park) This is ugly, but need to be here for backwrard compatibility.
+        from hydra.core.hydra_config import HydraConfig
+        joint_regressor_train_extra_file = cfg.JOINT_REGRESSOR_TRAIN_EXTRA
+        joint_regressor_h36m_correct_file = cfg.JOINT_REGRESSOR_H36M_correct
+        if HydraConfig.initialized():
+            joint_regressor_train_extra_file = os.path.join(get_original_cwd(), joint_regressor_train_extra_file)
+            joint_regressor_h36m_correct_file = os.path.join(get_original_cwd(), joint_regressor_h36m_correct_file)
+
+        # J_regressor_extra = torch.from_numpy(np.load(cfg.JOINT_REGRESSOR_TRAIN_EXTRA)).float()
+        J_regressor_extra = torch.from_numpy(np.load(joint_regressor_train_extra_file)).float()
         self.register_buffer('J_regressor_extra', J_regressor_extra)
         self.joints_idx = cfg.JOINTS_IDX
 
-        J_regressor_h36m_correct = torch.from_numpy(np.load(cfg.JOINT_REGRESSOR_H36M_correct)).float()
+        # J_regressor_h36m_correct = torch.from_numpy(np.load(cfg.JOINT_REGRESSOR_H36M_correct)).float()
+        J_regressor_h36m_correct = torch.from_numpy(np.load(joint_regressor_h36m_correct_file)).float()
         self.register_buffer('J_regressor_h36m_correct', J_regressor_h36m_correct)
 
     def forward(self, pose, beta):
@@ -222,6 +239,11 @@ def get_graph_params(filename, nsize=1):
 class Mesh(object):
     """Mesh object that is used for handling certain graph operations."""
     def __init__(self, filename=cfg.SMPL_sampling_matrix, num_downsampling=1, nsize=1, device=torch.device('cuda')):
+        # (dennis.park) This is ugly, but need to be here for backwrard compatibility.
+        from hydra.core.hydra_config import HydraConfig
+        if HydraConfig.initialized():
+            filename = os.path.join(get_original_cwd(), filename)
+
         self._A, self._U, self._D = get_graph_params(filename=filename, nsize=nsize)
         # self._A = [a.to(device) for a in self._A]
         self._U = [u.to(device) for u in self._U]

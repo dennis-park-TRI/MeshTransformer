@@ -1,0 +1,4 @@
+NAME: hrnet-w64
+
+HRNET_CONFIG: models/hrnet/cls_hrnet_w64_sgd_lr5e-2_wd1e-4_bs32_x100.yaml
+HRNET_CKPT: models/hrnet/hrnetv2_w64_imagenet_pretrained.pth

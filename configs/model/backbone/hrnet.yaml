@@ -1,0 +1,4 @@
+NAME: hrnet
+
+HRNET_CONFIG: models/hrnet/cls_hrnet_w40_sgd_lr5e-2_wd1e-4_bs32_x100.yaml
+HRNET_CKPT: models/hrnet/hrnetv2_w40_imagenet_pretrained.pth

@@ -12,12 +12,20 @@ from detectron2.utils.comm import get_world_size
 from metro.datasets.human_mesh_tsv import (MeshTSVDataset, MeshTSVYamlDataset)
 from metro.datasets.hand_mesh_tsv import (HandMeshTSVDataset, HandMeshTSVYamlDataset)
 
+from hydra.utils import get_original_cwd
+
 
 def build_dataset(yaml_file, args, is_train=True, scale_factor=1):
     print(yaml_file)
     if not op.isfile(yaml_file):
         yaml_file = op.join(args.data_dir, yaml_file)
         # code.interact(local=locals())
+
+        # (dennis.park) This is ugly, but need to be here for backwrard compatibility.
+        from hydra.core.hydra_config import HydraConfig
+        if HydraConfig.initialized():
+            yaml_file = op.join(get_original_cwd(), yaml_file)
+
         assert op.isfile(yaml_file)
     return MeshTSVYamlDataset(yaml_file, is_train, False, scale_factor)
 

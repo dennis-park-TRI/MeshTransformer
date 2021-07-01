@@ -1,11 +1,20 @@
 defaults:
   - model/metro_smpl
+  - model/backbone/hrnet_w64
+  - solver/sgd
 
 WANDB:
   ENABLED: True
   DRYRUN: False
   PROJECT: metro
   TAGS: []
+
+EVAL_ONLY: False
+
+TEST:
+  ENABLED: True
+  EVAL_PERIOD: 2000
+  ADDITIONAL_EVAL_STEPS: []
 
 hydra:
   callbacks:
@@ -16,3 +25,6 @@ hydra:
     download_ckpt_callback:
       _target_: metro.utils.hydra.callbacks.DownloadCkptCallback
   verbose: True
+
+
+
